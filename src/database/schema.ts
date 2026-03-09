@@ -33,9 +33,11 @@ export const equipmentsTable = pgTable(
       .generatedAlwaysAs(
         (): SQL =>
           sql`
-            setweight(to_tsvector('english', ${equipmentsTable.name}), 'A')
+            setweight(to_tsvector('portuguese', ${equipmentsTable.id}), 'A') 
             ||
-            setweight(to_tsvector('english', ${equipmentsTable.description}), 'B')
+            setweight(to_tsvector('portuguese', ${equipmentsTable.name}), 'A')
+            ||
+            setweight(to_tsvector('portuguese', ${equipmentsTable.description}), 'B')
             ||
             setweight(to_tsvector('simple', immutable_array_to_string(${equipmentsTable.tags})), 'C')
             `,

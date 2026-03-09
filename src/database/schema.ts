@@ -21,18 +21,24 @@ export const equipmentsTable = pgTable(
     id: text().primaryKey(),
     name: text(),
     description: text(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
     tags: text().array(),
     search: tsvector('search')
       .notNull()
       .generatedAlwaysAs(
         (): SQL =>
           sql`
-            setweight(to_tsvector('simple', array_to_string(${equipmentsTable.tags}, ' ')), 'C') ||
             setweight(to_tsvector('english', ${equipmentsTable.name}), 'A')
             ||
-            setweight(to_tsvector('english', ${equipmentsTable.description}), 'B')`,
+            setweight(to_tsvector('english', ${equipmentsTable.description}), 'B')
+            ||
+            setweight(to_tsvector('simple', immutable_array_to_string(${equipmentsTable.tags})), 'C')
+            `,
       ),
   },
   (table) => [index('equipments_fts_index').using('GIN', table.search)],

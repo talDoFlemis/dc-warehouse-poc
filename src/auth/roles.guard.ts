@@ -10,12 +10,22 @@ export class RolesGuard extends AuthenticatedGuard {
   }
 
   async canActivate(context: ExecutionContext) {
+    const isAuthenticated = await super.canActivate(context);
+    if (!isAuthenticated) {
+      return false;
+    }
+
     const roles = this.reflector.get(Roles, context.getHandler());
     if (!roles) {
       return true;
     }
+
     const request = context.switchToHttp().getRequest();
-    const user = request.user;
+    const user = request.session?.user;
+    if (!user) {
+      return false;
+    }
+
     return roles.includes(user.role);
   }
 }

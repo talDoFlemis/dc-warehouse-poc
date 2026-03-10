@@ -15,12 +15,15 @@ RUN pnpm build
 
 # ---- Production stage ----
 FROM cgr.dev/chainguard/nginx:latest-dev
+USER nginx
 
 # Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built assets (includes vite-envs.sh)
-COPY --from=build /app/dist/ /usr/share/nginx/html/
+USER nginx
+
+COPY --from=build --chown=nginx:nginx /app/dist/ /usr/share/nginx/html/
 
 WORKDIR /usr/share/nginx/html
 
